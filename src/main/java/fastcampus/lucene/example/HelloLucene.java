@@ -33,10 +33,6 @@ public class HelloLucene {
     public static void main(String[] args) throws IOException, ParseException {
 
 
-        JasoDecomposer jasoDecomposer = new JasoDecomposer();
-        String result = jasoDecomposer.decomposer("삼성전자");
-        System.out.println(result);
-
         //기본 형태소 분석기로 색인과 검색을 실시함
         StandardAnalyzer analyzer = new StandardAnalyzer();
 

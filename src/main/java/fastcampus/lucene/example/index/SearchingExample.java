@@ -27,7 +27,7 @@ public class SearchingExample {
   }
 
   /**
-   * Simple command-line based search demo.
+   * 검색 예제
    */
   public static void main(String[] args) throws Exception {
     String usage =

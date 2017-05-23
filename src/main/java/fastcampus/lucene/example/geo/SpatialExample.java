@@ -34,8 +34,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertArrayEquals;
 
 /**
- * This class serves as example code to show how to use the Lucene spatial
- * module.
+ * Geo Spatial 검색 예제
  */
 public class SpatialExample extends TestCase {
 
@@ -60,9 +59,8 @@ public class SpatialExample extends TestCase {
   protected void init() {
     this.ctx = SpatialContext.GEO;
 
-    int maxLevels = 11;//results in sub-meter precision for geohash
+    int maxLevels = 11;// geohash에 대해서 서비 미터의 정밀도
 
-    //  This can also be constructed from SpatialPrefixTreeFactory
     SpatialPrefixTree grid = new GeohashPrefixTree(ctx, maxLevels);
 
     this.strategy = new RecursivePrefixTreeStrategy(grid, "myGeoField");
@@ -86,8 +84,6 @@ public class SpatialExample extends TestCase {
       for (IndexableField f : strategy.createIndexableFields(shape)) {
         doc.add(f);
       }
-      //store it too; the format is up to you
-      //  (assume point in this example)
       Point pt = (Point) shape;
       doc.add(new StoredField(strategy.getFieldName(), pt.getX()+" "+pt.getY()));
     }
@@ -99,17 +95,14 @@ public class SpatialExample extends TestCase {
     IndexSearcher indexSearcher = new IndexSearcher(indexReader);
     Sort idSort = new Sort(new SortField("id", SortField.Type.INT));
 
-    //--Filter by circle (<= distance from a point)
     {
-      //Search with circle
-      //note: SpatialArgs can be parsed from a string
+
       SpatialArgs args = new SpatialArgs(SpatialOperation.Intersects,
               ctx.makeCircle(-80.0, 33.0, DistanceUtils.dist2Degrees(200, DistanceUtils.EARTH_MEAN_RADIUS_KM)));
       //Filter filter = strategy.makeFilter(args);
       TopDocs docs = indexSearcher.search(new MatchAllDocsQuery(), 10, idSort);
       assertDocMatchedIds(indexSearcher, docs, 2);
-      //Now, lets get the distance for the 1st doc via computing from stored point value:
-      // (this computation is usually not redundant)
+
       Document doc1 = indexSearcher.doc(docs.scoreDocs[0].doc);
       String doc1Str = doc1.getField(strategy.getFieldName()).stringValue();
       //assume doc1Str is "x y" as written in newSampleDocument()
@@ -121,21 +114,14 @@ public class SpatialExample extends TestCase {
       //or more simply:
       assertEquals(121.6d, doc1DistDEG * DistanceUtils.DEG_TO_KM, 0.1);
     }
-    //--Match all, order by distance ascending
     {
       Point pt = ctx.makePoint(60, -50);
       ValueSource valueSource = strategy.makeDistanceValueSource(pt, DistanceUtils.DEG_TO_KM);//the distance (in km)
       Sort distSort = new Sort(valueSource.getSortField(false)).rewrite(indexSearcher);//false=asc dist
       TopDocs docs = indexSearcher.search(new MatchAllDocsQuery(), 10, distSort);
       assertDocMatchedIds(indexSearcher, docs, 4, 20, 2);
-      //To get the distance, we could compute from stored values like earlier.
-      // However in this example we sorted on it, and the distance will get
-      // computed redundantly.  If the distance is only needed for the top-X
-      // search results then that's not a big deal. Alternatively, try wrapping
-      // the ValueSource with CachingDoubleValueSource then retrieve the value
-      // from the ValueSource now. See LUCENE-4541 for an example.
+
     }
-    //demo arg parsing
     {
       SpatialArgs args = new SpatialArgs(SpatialOperation.Intersects,
               ctx.makeCircle(-80.0, 33.0, 1));

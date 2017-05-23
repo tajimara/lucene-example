@@ -27,7 +27,7 @@ public class IndexingDbExample {
     }
 
     /**
-     * 루씬 색인 예제 파일
+     * 루씬 색인 예제 파일 (데이터 베이스에서)
      */
     public static void main(String[] args) {
         String usage = "java org.apache.lucene.demo.IndexFiles"

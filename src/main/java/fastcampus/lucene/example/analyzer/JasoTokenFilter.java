@@ -67,10 +67,10 @@ public class JasoTokenFilter extends TokenFilter {
             JasoDecomposer jasoDecomposer = new JasoDecomposer();
             String currentTokenInStream = this.input.getAttribute(CharTermAttribute.class).toString().trim();
             String decomposerTokenInStream =  jasoDecomposer.decomposer(currentTokenInStream);
-            if(decomposerTokenInStream.indexOf("★")>-1){
+            if(decomposerTokenInStream.contains("★")){
                 String[] spl = decomposerTokenInStream.split("★");
                 for(String splData : spl){
-                    if("".equals(splData.trim())==true) continue;
+                    if("".equals(splData.trim())) continue;
                     terms.add(splData.toCharArray());
                 }
             }

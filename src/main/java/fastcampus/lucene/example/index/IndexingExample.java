@@ -103,8 +103,8 @@ public class IndexingExample {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     try {
-                        //indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
-                        indexDocForCsv(writer, file, attrs.lastModifiedTime().toMillis());
+                        indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
+                        //indexDocForCsv(writer, file, attrs.lastModifiedTime().toMillis());
                     } catch (IOException ignore) {
                         // don't index files that can't be read.
                     }
@@ -124,6 +124,11 @@ public class IndexingExample {
             // 빈 새로운 문서 생성
             Document doc = new Document();
 
+            FieldType koreanType = new FieldType();
+            koreanType.setStored(true);
+            koreanType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+            koreanType.setStoreTermVectorOffsets(true);
+
             // 파일 경로 저장
             Field pathField = new StringField("path", file.toString(), Field.Store.YES);
             doc.add(pathField);
@@ -132,7 +137,8 @@ public class IndexingExample {
             doc.add(new LongPoint("modified", lastModified));
 
             // 파일 내용 저장
-            doc.add(new TextField("contents", new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
+            String data = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).readLine();
+            doc.add(new TextField("contents",data,Field.Store.YES));
 
             if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
                 // 새로운 색인의 경우 새로 색인을 생성함

@@ -136,8 +136,18 @@ public class IndexingExample {
             //파일 최종 수정일자 저장
             doc.add(new LongPoint("modified", lastModified));
 
+
+            BufferedReader br = null;
+            br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             // 파일 내용 저장
-            String data = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)).readLine();
+            String result = null;
+            String data = null;
+            while((result=br.readLine())!=null){
+
+                // 읽은 데이터(한줄)을 BufferedWriter에 쓴다.
+                // 한줄씩 읽으므로, newLine() 메소드로 줄바꿈을 해준다.
+                data += result;
+            }
             doc.add(new TextField("contents",data,Field.Store.YES));
 
             if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {

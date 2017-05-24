@@ -40,7 +40,7 @@ public class SearchingExample {
 
     String index = "index/txt"; //기본 인덱스 위치
     String field = "contents";
-    String queryString = "감기"; //검색어
+    String queryString = "굉장히 비싼"; //검색어
     int repeat = 0;
     boolean raw = false;
     int hitsPerPage = 10;

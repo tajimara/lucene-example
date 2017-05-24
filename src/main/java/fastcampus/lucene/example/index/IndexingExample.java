@@ -8,21 +8,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 
-import fastcampus.lucene.example.database.MysqlConnect;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
-import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.*;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.*;
 
 
 public class IndexingExample {
@@ -31,76 +25,66 @@ public class IndexingExample {
     }
 
     /**
-     * 루씬 색인 예제 파일 (파일 및 csv에서)
+     * 루씬 색인 예제 파일
      */
     public static void main(String[] args) {
-        String usage = "java org.apache.lucene.demo.IndexFiles"
-                + " [-index INDEX_PATH] [-docs DOCS_PATH] [-update]\n\n"
-                + "인덱스 경로  문서 경로 업데이트 유무 "
-                + "SearchFiles 로 검색";
 
-        String indexPath = "./index";         //기본 index 패스
-        String docsPath = null;
-        boolean create = true;                //생성모드인지 추가 모드인지
-
-        for (int i = 0; i < args.length; i++) {
-            if ("-index".equals(args[i])) {
-                indexPath = args[i + 1];
-                i++;
-            } else if ("-docs".equals(args[i])) {
-                docsPath = args[i + 1];
-                i++;
-            } else if ("-update".equals(args[i])) {
-                create = false;
-            }
+        if(args.length != 3) {
+            throw new IllegalArgumentException("사용법 : java "+ IndexingExample.class.getName() + " <index dir> <data dir> <create mode bool>");
         }
 
-        if (docsPath == null) {
-            System.err.println("Usage: " + usage);
-            System.exit(1);
-        }
+        String indexPath = args[0]; //기본 index 패스
+        String docsPath =  args[1]; //기본 data 패스
+        boolean create = Boolean.parseBoolean(args[2]);      //생성모드인지 추가 모드인지   true면 create 모드
 
         final Path docDir = Paths.get(docsPath);
         if (!Files.isReadable(docDir)) {
-            System.out.println("Document directory '" + docDir.toAbsolutePath() + "' does not exist or is not readable, please check the path");
+            System.out.println("Document directory '" + docDir.toAbsolutePath() + "' 파일이 존재하지 않거나 해당 경로를 읽을수 없습니다.");
             System.exit(1);
         }
+        Date start = new Date();  //수행 시간 측정용
 
-        Date start = new Date();
         try {
             System.out.println("인덱스 디렉토리 문서를 색인 합니다. '" + indexPath + "'...");
 
-            Directory dir = FSDirectory.open(Paths.get(indexPath));
-            Analyzer analyzer = new StandardAnalyzer();                 //기본 스탠다드분석기를 사용함
-            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);  //인덱스Writer의 설정을 지정하는 클래스
+            Directory dir = SimpleFSDirectory.open(Paths.get(indexPath));
 
-            if (create) {
-                // 새로운 인덱스를 생성하고 기존의 문서를 삭제함
-                indexWriterConfig.setOpenMode(OpenMode.CREATE);
-            } else {
-                // 기존 인덱스에 새도큐먼트를 추가함
-                indexWriterConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
-            }
-
-            //indexWriterConfig.setUseCompoundFile(false); //다중 파일 색인 생성시  !!!!!!!
+            Analyzer analyzer = new StandardAnalyzer();                             //기본 스탠다드분석기를 사용함
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);  //인덱스 Writer의 설정을 지정하는 클래스
+//            if (create) {
+//                // 새로운 인덱스를 생성하고 기존의 문서를 삭제함
+//                indexWriterConfig.setOpenMode(OpenMode.CREATE);
+//            } else {
+//                // 기존 인덱스에 새도큐먼트를 추가함
+//                indexWriterConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
+//            }
+            indexWriterConfig.setOpenMode(OpenMode.CREATE);
+            indexWriterConfig.setUseCompoundFile(false); //다중 파일 색인 생성시  !!!!!!!
 
             // 생인성능을 위해 램버퍼를 지정할수 있음
             // 많은 수의 문서를 색인 할 경우 램 버퍼값을 추가해 주면 좋음
             // 단 힙사이즈는 넘기면 안됨
             // indexWriterConfig.setRAMBufferSizeMB(256.0);
+            //indexWriterConfig.setMergePolicy()
 
-            IndexWriter writer = new IndexWriter(dir, indexWriterConfig);
-
-
+            IndexWriter writer = new IndexWriter(dir, indexWriterConfig);           //lucene in action에 있는 IndexWriter 생성 방법은 deprecated됨 이제는  Config를 받는 방식으로 변경
             indexDocs(writer, docDir); //문서를 색인함
+
+            //writer.commit();
+
             //indexDatabase(writer);  //데이터 베이스에서 색인
-
-
+//            final Path docDir2 = Paths.get("data/csv");
+//            indexDocs(writer, docDir2); //문서를 색인함
+//            writer.commit();
             //색인 성능을 위해서 색인 종료후
             // 강제 병합을 할 수 있음
             // writer.forceMerge(1);
 
             writer.close();
+
+//            IndexWriterConfig indexWriterConfig2 = new IndexWriterConfig(analyzer);  //인덱스 Writer의 설정을 지정하는 클래스
+//            IndexWriter writer2 = new IndexWriter(dir, indexWriterConfig2);           //lucene in action에 있는 IndexWriter 생성 방법은 deprecated됨 이제는  Config를 받는 방식으로 변경
+//            writer2.close();
 
             Date end = new Date();
             System.out.println(end.getTime() - start.getTime() + " total milliseconds");
@@ -119,6 +103,7 @@ public class IndexingExample {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     try {
+                        //indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
                         indexDocForCsv(writer, file, attrs.lastModifiedTime().toMillis());
                     } catch (IOException ignore) {
                         // don't index files that can't be read.
@@ -153,6 +138,7 @@ public class IndexingExample {
                 // 새로운 색인의 경우 새로 색인을 생성함
                 System.out.println("adding " + file);
                 writer.addDocument(doc);
+
             } else {
                 //이미 색인이 존재하고 업데이트인 경우 색인을 추가함
                 System.out.println("updating " + file);
@@ -169,7 +155,7 @@ public class IndexingExample {
      *-----------------------------------------------------------
     */
     static void indexDocForCsv(IndexWriter writer, Path file, long lastModified) throws IOException {
-        String csvFile ="./data/books.csv";
+        String csvFile ="./data/csv/books.csv";
         String line = "";
         String cvsSplitBy = ",";
 
@@ -179,23 +165,51 @@ public class IndexingExample {
                 // use comma as separator
 
                 String[] data = line.split(cvsSplitBy);
-                Field idField = new StringField("id", data[0], Field.Store.YES);
-                Field catField = new StringField("cat", data[1], Field.Store.YES);
-                Field nameField = new StringField("name", data[2], Field.Store.YES);
-                Field priceField = new FloatDocValuesField("price",Float.parseFloat(data[3]));
-                Field inStockField = new StringField("instock", data[4], Field.Store.YES);
-                Field authorField = new StringField("author", data[5], Field.Store.YES);
-                Field seriesField = new StringField("series", data[6], Field.Store.YES);
-                Field genreField = new StringField("genre", data[8], Field.Store.YES);
 
-                doc.add(idField);
-                doc.add(catField);
-                doc.add(nameField);
-                doc.add(priceField);
-                doc.add(inStockField);
-                doc.add(authorField);
-                doc.add(seriesField);
-                doc.add(genreField);
+                FieldType koreanType = new FieldType();
+                koreanType.setStored(true);
+                koreanType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+                koreanType.setStoreTermVectorOffsets(true);
+                final FieldType ft = new FieldType(TextField.TYPE_STORED);
+
+//                ft.setStoreTermVectors(true);
+//                ft.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+//                ft.setOmitNorms(true);
+//                ft.setStored(true);
+//                doc.add(new Field("title", "나는 자랑스러운", ft));
+//
+//
+//                Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
+//                analyzerMap.put("id", new StandardAnalyzer();
+//                analyzerMap.put("title", new WhitespaceAnalyzer();
+//                PerFieldAnalyzerWrapper wrapper = new PerFieldAnalyzerWrapper(new StandardAnalyzer(), analyzerMap);
+//                IndexWriterConfig iwConfig = new IndexWriterConfig(wrapper);
+
+//                class 	LegacyDoubleField	Deprecated. 
+//                Please use DoublePoint instead
+//                class 	LegacyFloatField	Deprecated. 
+//                Please use FloatPoint instead
+//                class 	LegacyIntField	Deprecated. 
+//                Please usinsteade IntPoint
+//                class 	LegacyLongField	Deprecated. 
+//                Please use LongPoint instead
+
+                //필드별 부스트 예제
+                Field field = new StringField("id", data[0], Field.Store.YES);
+                //field.setBoost(10);
+                //문서 부스트는 DoubleDocValuesField로 잊ㄴ
+
+                doc.add(new StringField("id", data[0], Field.Store.YES));
+                doc.add(new StringField("cat", data[1], Field.Store.YES));
+                doc.add(new StringField("name", data[2], Field.Store.YES));
+                doc.add(new FloatDocValuesField("price",Float.parseFloat(data[3])));
+                doc.add(new StringField("instock", data[4], Field.Store.YES));
+                doc.add(new StringField("author", data[5], Field.Store.YES));
+                doc.add(new StringField("series", data[6], Field.Store.YES));
+                doc.add(new StringField("genre", data[8], Field.Store.YES));
+                doc.add(new DoubleDocValuesField("boost", 10));
+
+
 
                 if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
                     // 새로운 색인의 경우 새로 색인을 생성함

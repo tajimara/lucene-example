@@ -15,20 +15,17 @@ package fastcampus.lucene.example.search;
  * See the License for the specific lan      
 */
 
-import java.io.IOException;
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.spell.SpellChecker;
-import org.apache.lucene.search.spell.JaroWinklerDistance;
-import org.apache.lucene.search.spell.LevensteinDistance;
-import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.search.spell.*;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.store.FSDirectory;
+
 
 /*
   #A 스펠체커용 인덱스 생성
@@ -37,33 +34,43 @@ import org.apache.lucene.index.IndexReader;
 */
 public class SpellCheckerExample {
 
-  public static void main(String[] args) throws IOException {
 
-    if (args.length != 2) {
-      System.out.println("Usage: java lia.tools.SpellCheckerTest SpellCheckerIndexDir wordToRespell");
-      System.exit(1);
+  public static void main(String[] args) throws Exception {
+    Directory directory = FSDirectory.open(Paths.get("./index/spell/"));
+
+    SpellChecker spellChecker = new SpellChecker(directory);
+    Analyzer analyzer = new StandardAnalyzer();                             //기본 스탠다드분석기를 사용함
+    IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);  //인덱스 Writer의 설정을 지정하는 클래스
+
+    Path path = Paths.get("./data/spell/dic.txt");
+
+    spellChecker.setSpellIndex(directory);
+    spellChecker.indexDictionary(
+            new PlainTextDictionary(path),indexWriterConfig,true);
+    String wordForSuggestions = "삼성전";
+    spellChecker.setStringDistance(new LevensteinDistance());  //#Levenstein 편집거리 알고리즘
+//    //spell.setStringDistance(new JaroWinklerDistance());  //Jaro-Winkler 알고리즘
+
+    int suggestionsNumber = 5;
+    String[] suggestions = spellChecker.
+            suggestSimilar(wordForSuggestions, suggestionsNumber);
+    if (suggestions != null && suggestions.length > 0) {
+
+      for (String word : suggestions) {
+
+        System.out.println("Did you mean:" + word);
+
+      }
+
+    } else {
+
+      System.out.println("No suggestions found for word:" + wordForSuggestions);
+
     }
 
-    String spellCheckDir = args[0];
-    String wordToRespell = args[1];
 
-    FSDirectory dir = FSDirectory.open(Paths.get(spellCheckDir));
-    if (!DirectoryReader.indexExists(dir)) {
-      System.out.println("\nERROR: No spellchecker index at path \"" +
-                         spellCheckDir +
-                         "\"; please run CreateSpellCheckerIndex first\n");
-      System.exit(1);
-    }
-    SpellChecker spell = new SpellChecker(dir);  //#A
-
-    spell.setStringDistance(new LevensteinDistance());  //#Levenstein 편집거리 알고리즘
-    //spell.setStringDistance(new JaroWinklerDistance());  //Jaro-Winkler 알고리즘
-
-    String[] suggestions = spell.suggestSimilar(wordToRespell, 5); //#C
-    System.out.println(suggestions.length + " suggestions for '" + wordToRespell + "':");
-    for (String suggestion : suggestions)
-      System.out.println("  " + suggestion);
   }
+
 }
 
 

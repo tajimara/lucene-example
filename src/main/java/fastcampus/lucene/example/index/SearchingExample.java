@@ -75,7 +75,6 @@ public class SearchingExample {
 
     //인덱스를 읽어들임
     IndexReader reader = DirectoryReader.open(FSDirectory.open(Paths.get(index)));
-
     //서처를 생성함
     IndexSearcher searcher = new IndexSearcher(reader);
 

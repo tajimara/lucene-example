@@ -62,9 +62,7 @@ public class SpatialExample extends TestCase {
     int maxLevels = 11;// geohash에 대해서 서비 미터의 정밀도
 
     SpatialPrefixTree grid = new GeohashPrefixTree(ctx, maxLevels);
-
     this.strategy = new RecursivePrefixTreeStrategy(grid, "myGeoField");
-
     this.directory = new RAMDirectory();
   }
 

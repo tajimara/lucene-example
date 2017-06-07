@@ -2,6 +2,21 @@
 - Putty 혹은 iTerm 설치
 - 다운받은 fastcampus.pem 파일로 접속
 예) ssh -i fastcampus.pem ec2-user@52.78.129.114
+
+
+윈도우 putty의 경우
+https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
+putty와 puttygen을 다운로드
+puttygen 실행
+open 후 fastcampus.pem을 선택후 [Save private key] 저장
+
+putty 실행후
+호스트명 ec2-user@52.78.129.114 접속
+putty configuration 에서 [ssh]-[auth] 메뉴에서 private key for authentication 메뉴를 통해 생성한 키값 로드
+
+
+
+
 - root 패스워드 변경
 sudo passwd root
 

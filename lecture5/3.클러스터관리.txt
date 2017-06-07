@@ -1,0 +1,160 @@
+1. 리밸런싱
+http://52.79.172.251:9200/_cluster/settings?pretty=true
+$ curl -XPUT 'localhost:9200/_cluster/settings?pretty=true' -d
+{
+    "transient" : {
+        "cluster.routing.allocation.enable" : "none"
+    }
+}
+
+-클러스터 셧다운
+
+$ curl -XPUT 'localhost:9200/_cluster/settings?pretty=true' -d
+{
+    "transient" : {
+        "cluster.routing.allocation.enable" : "all"
+    }
+}
+
+
+2. 라우팅
+PUT my_index/my_type/1?routing=user1&refresh=true
+{
+  "title": "This is a document"
+}
+GET my_index/my_type/1?routing=user1
+GET my_index/_search
+{
+  "query": {
+    "terms": {
+      "_routing": [ "user1" ]
+    }
+  }
+}
+
+매핑으로 라이팅 path를 지정하는 것은 deprecated됨
+
+3.alias
+
+
+case1:  색인을 중단 없이 교체할때
+http://52.79.172.251:9200/store_v1/item/1
+{
+  "title": "This is a document"
+}
+
+별칭을 걸어서 운영함
+http://52.79.172.251:9200/_aliases
+{
+    "actions": [
+        { "add": {
+            "alias": "store",
+            "index": "store_v1"
+        }}
+    ]
+}
+
+색인변경 이슈가 생겼을때 (다음버전 생성)
+http://52.79.172.251:9200/store_v2/item/1
+{
+  "title": "This is a document"
+}
+
+별칭 교체
+curl -XPOST localhost:9200/_aliases -d '
+{
+    "actions": [
+        { "remove": {
+            "alias": "store",
+            "index": "store_v1"
+        }},
+        { "add": {
+            "alias": "store",
+            "index": "store_v2"
+        }}
+    ]
+}
+'
+
+정상확인후 기존 인덱스 삭제
+
+
+case2: 많은 인덱스의 대표 이름을 붙일때
+curl -XPUT localhost:9200/_template/template_2014 -d '
+{
+  "template" : "logs-2014-*",
+  "aliases" : {
+    "logs-2014" : {}
+  }
+}
+'
+curl -XPUT localhost:9200/_template/template_2014_04 -d '
+{
+  "template" : "logs-2014-04-*",
+  "aliases" : {
+    "logs-2014-04" : {}
+  }
+}
+'
+curl -XPUT localhost:9200/_template/template_2014 -d '
+{
+  "template" : "logs-2014-*",
+  "aliases" : {
+    "{index}-alias" : {}
+  }
+}
+'
+
+
+3. Shard Overllocation
+샤드를 노드 사이에 넘기는 기법
+
+4. replica 변경
+PUT /store/_settings
+{
+    "index" : {
+        "number_of_replicas" : 2
+    }
+}
+
+5. unassigned shard
+
+Shard allocation is purposefully delayed
+Too many shards, not enough nodes
+You need to re-enable shard allocation
+Shard data no longer exists in the cluster
+Low disk watermark
+Multiple Elasticsearch versions
+
+- 디스크 용량 부족시
+85 percent low watermark
+curl -XPUT 'localhost:9200/_cluster/settings' -d
+'{
+    "transient": {
+      "cluster.routing.allocation.disk.watermark.low": "90%"
+    }
+}'
+cluster.routing.allocation.disk.watermark.high
+
+6. split brain
+In case of Clustering
+
+- problem network communications.
+
+- corrupt data of each nodes.
+
+discovery.zen.minimum_master_nodes: 2  (default 1)
+(master_eligible_nodes / 2) + 1
+
+7. GC 모니터링
+stat -gcutil -h5 [pid] 1000
+  - S0 : Survivor 영역 0 의 사용율 (현재의 용량에 대한 퍼센티지)
+  - S1 : Survivor 영역 1 의 사용율 (현재의 용량에 대한 퍼센티지)
+  - E : Eden 영역의 사용율 (현재의 용량에 대한 퍼센티지)
+  - O : Old 영역의 사용율 (현재의 용량에 대한 퍼센티지)
+  - P : Permanent 영역의 사용율 (현재의 용량에 대한 퍼센티지)
+  - YGC : Young 세대의 GC 이벤트수
+  - YGCT : Young 세대의 가베지 콜렉션 시간
+  - FGC : 풀 GC 이벤트수
+  - FGCT : 풀 가베지 콜렉션 시간
+  - GCT : 가베지 콜렉션총시간

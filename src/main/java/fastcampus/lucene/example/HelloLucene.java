@@ -38,11 +38,11 @@ public class HelloLucene {
 
         System.out.println("색인을 시작함 ");
         //램디렉토리에 색인을 실시함
-        Directory index = new RAMDirectory();
-
+        Directory directory = new RAMDirectory();
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
 
-        IndexWriter w = new IndexWriter(index, config);
+
+        IndexWriter w = new IndexWriter(directory, config);
         addDoc(w, "Lucene in Action", "193398817");
         addDoc(w, "Lucene for Dummies", "55320055Z");
         addDoc(w, "Managing Gigabytes", "55063554A");
@@ -60,7 +60,7 @@ public class HelloLucene {
 
         // Search
         int hitsPerPage = 10;
-        IndexReader reader = DirectoryReader.open(index);
+        IndexReader reader = DirectoryReader.open(directory);
         IndexSearcher searcher = new IndexSearcher(reader);
         TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage);
         searcher.search(q, collector);

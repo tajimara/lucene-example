@@ -1,10 +1,17 @@
+import com.ibm.icu.text.Normalizer2;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.icu.ICUNormalizer2Filter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,13 +23,23 @@ import java.util.Map;
 public class AnalyzerTest {
 
     public static void main(String[] args) throws IOException {
-        String source = "dkdlvhs";
+        String source = "김지훈";
 
         long start = System.currentTimeMillis();
 
         System.out.println("Korean analysis init");
-        StandardAnalyzer analyzer = new StandardAnalyzer();
-
+        Analyzer analyzer = new Analyzer() {
+            @Override
+            protected TokenStreamComponents createComponents(String s) {
+                Reader reader = new StringReader(s);
+                Tokenizer tokenizer = new StandardTokenizer();
+                tokenizer.setReader(reader);
+                String name = "nfc";
+                Normalizer2 normalizer =  Normalizer2.getInstance(null, name, Normalizer2.Mode.DECOMPOSE);
+                TokenFilter filter = new ICUNormalizer2Filter(tokenizer, normalizer);
+                return new TokenStreamComponents(tokenizer, filter);
+            }
+        };
         TokenStream stream = analyzer.tokenStream("", new StringReader(source));
 
         int loop_cnt = 0;

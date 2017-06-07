@@ -1,0 +1,119 @@
+1.EC2 접속
+- Putty 혹은 iTerm 설치
+- 다운받은 fastcampus.pem 파일로 접속
+예) ssh -i fastcampus.pem ec2-user@52.78.129.114
+- root 패스워드 변경
+sudo passwd root
+
+2. 자바8 설치
+-설치가능한 자바 버전 확인
+yum list java*jdk-devel
+-설치
+yum install java-1.8.0-openjdk-devel.x86_64
+-시스템에서 사용할 자바 버전 변경
+alternatives --config java
+alternatives --config javac
+
+3. 엘라스틱서치 다운로드 및 설치
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.1.1.tar.gz
+tar zxvf elasticsearch-5.1.1.tar.gz
+
+4. 노드 복사
+cp  elasticsearch-5.1.1 node1
+cp  elasticsearch-5.1.1 node2
+cp  elasticsearch-5.1.1 node3
+
+5. 힙메모리 수정
+vi node1/config/jvm.options
+
+6. 실행
+node1/bin/elasticsearch
+
+7. 파일 최대 개방 갯수 늘리기
+-임시 조절
+ulimit -n 65536
+
+-영구 조절
+vi /etc/security/limits.conf
+아래 텍스트 추가
+root hard nofile 65536
+root soft nofile 65536
+root hard nproc 65536
+root soft nproc 65536
+
+8. vm.max_map_count 부족 오류 해결
+설정되어 있는 vm.max_map_count 값 확인
+$ sysctl vm.max_map_count
+
+vm.max_map_count 값 설정
+$ sysctl -w vm.max_map_count=262144
+
+conf 파일로 설정
+$ vi /etc/sysctl.conf
+$ sysctl -p
+
+9.head 설치
+-git 설치
+yum install git
+
+-npm 설치
+sudo yum install epel-release
+yum install npm --enablerepo=epel
+
+-다운로드
+git clone git://github.com/mobz/elasticsearch-head.git
+
+-설치 및 실행
+cd elasticsearch-head
+npm install
+npm run start
+
+- 확인
+http://{주소}:9100
+
+-외부에서 보기
+elasticsearch.yml에 추가
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+
+http.cors.allow-headers: Authorization  (http://localhost:9100/?auth_user=elastic&auth_password=changeme)
+
+
+10. 은전한닢 설치하기
+-쉬운 설치 법
+bash <(curl -s https://bitbucket.org/eunjeon/seunjeon/raw/master/elasticsearch/scripts/downloader.sh) -e 5.1.1 -p 5.1.1.1
+bin/elasticsearch-plugin install file://`pwd`/elasticsearch-analysis-seunjeon-5.1.1.1.zip
+
+-테스트 해보기 (분석기 설정
+ {
+   "settings" : {
+     "index":{
+       "analysis":{
+         "analyzer":{
+           "korean":{
+             "type":"custom",
+             "tokenizer":"seunjeon_default_tokenizer"
+           }
+         },
+         "tokenizer": {
+           "seunjeon_default_tokenizer": {
+             "type": "seunjeon_tokenizer",
+             "index_eojeol": false,
+             "user_words": ["낄끼+빠빠,-100", "c\\+\\+", "어그로", "버카충", "abc마트"]
+           }
+         }
+       }
+     }
+   }
+ }
+- 테스트 분석
+{
+  "analyzer" : "korean",
+  "text" : "한글형태소분석기 "
+}
+
+
+11. elasticsearch.yml 설명
+
+12. 보안세팅
+

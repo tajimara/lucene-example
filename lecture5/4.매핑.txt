@@ -1,0 +1,207 @@
+1. 매핑 테스트
+PUT http://localhost:9200/news
+{
+  "mappings": {
+    "article": {
+      "properties": {
+        "title": {
+          "type" : "string"
+        },
+        "link" : {
+          "type" : "string"
+        },
+        "reg_date" : {
+          "type" : "date"
+        }
+      }
+    }
+  }
+}
+
+PUT http://localhost:9200/news/_mapping/article
+{
+  "properties": {
+    "title": {
+      "type" : "string"
+    },
+    "link" : {
+      "type" : "string"
+    },
+    "reg_date" : {
+      "type" : "date"
+    }
+  }
+}
+
+2. 설정된 매핑 조회
+GET http://localhost:9200/news/_mapping/article
+
+3. 분석기 매핑 추가
+분석기 추가 매핑
+PUT http://localhost:9200/news
+{
+  "mappings": {
+    "article": {
+      "properties": {
+        "id": {"type":"long","store":"yes","precision_step":"8"},
+        "title": {"type" : "string","store":"yes","index":"analyzed"},
+        "link" : {"type" : "string"},
+        "content" : {"type" : "string","store":"no","index":"analyzed"},
+        "reg_date" : {"type" : "date"}
+      }
+    }
+  }
+}
+
+
+중첩된 매핑
+{
+  "properties": {
+    "urn":          {"type": "string", "index": "not_analyzed"},
+    "title":        {"type": "string", "analyzer": "korean"},
+    "content":      {"type": "string", "analyzer": "korean"},
+    "writer":       {
+      "type": "nested",
+      "properties": {
+        "name": {"type": "string", "index": "not_analyzed"},
+        "email": {"type": "string", "index": "not_analyzed"}
+      }
+    }
+  }
+}
+
+
+PUT my_index
+{
+  "mappings": {
+    "user": {
+      "_all":       { "enabled": false  },
+      "properties": {
+        "title":    { "type": "text"  },
+        "name":     { "type": "text"  },
+        "age":      { "type": "integer" }
+      }
+    },
+    "blogpost": {
+      "_all":       { "enabled": false  },
+      "properties": {
+        "title":    { "type": "text"  },
+        "body":     { "type": "text"  },
+        "user_id":  {
+          "type":   "keyword"
+        },
+        "created":  {
+          "type":   "date",
+          "format": "strict_date_optional_time||epoch_millis"
+        }
+      }
+    }
+  }
+}
+
+
+4. 독자적 분석기 세팅
+PUT http://localhost:9200/news/_settings
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "my_english_analyzer": {
+          "type": "standard",
+          "max_token_length": 5,
+          "stopwords": "_english_"
+        }
+      }
+    }
+  }
+}
+
+좀더 복잡한 분석기 세팅
+PUT http://localhost:9200/news/_settings
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "my_custom_analyzer": {
+          "type":      "custom",
+          "tokenizer": "standard",
+          "char_filter": [
+            "html_strip"
+          ],
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+}
+
+세팅을 조정하기 위해  인덱스  close
+http://localhost:9200/news/_close
+작업 완료후
+http://localhost:9200/news/_open
+
+세팅 내역 확인
+http://localhost:9200/news/_settings
+
+5. 분석기 테스트
+* 분석기 테스트
+POST http://localhost:9200/news/_analyze
+{
+  "analyzer": "my_custom_analyzer",
+  "text": "The 2 QUICK Brown-Foxes jumped over the lazy dog's bone."
+}
+
+
+POST http://localhost:9200/news/_analyze
+{
+  "tokenizer" : "keyword",
+  "filter" : ["lowercase"],
+  "text" : "this is a test"
+}'
+
+혹은
+http://localhost:9200/_analyze?tokenizer=whitespace&pretty
+http://localhost:9200/_analyze?filter=lowcase&pretty
+
+6. 좌표검색 매핑
+1. http://localhost:9200/news/_mapping/store  <-- 타입이름매
+{
+  "properties" : {
+    "store_name" : {
+      "type" : "string"
+    },
+    "location" : {
+      "type" : "geo_point"
+    }
+  }
+}
+
+데이터 입력
+{
+    "store_name":"스타벅스 커피 전문점",
+    "location":"37.525434,126.926644"
+}
+
+검색 테스트
+좌표 검색
+{
+    "query" : {
+      "filtered" : {
+          "query" : {
+              "match_all": {}
+          },
+          "filter" : {
+              "geo_distance" : {
+                  "distance" : "200km",
+                  "location" : {
+                      "lat" : 37.2323,
+                      "lon" : 126.232323
+                  }
+              }
+          }
+      }
+  }
+}

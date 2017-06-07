@@ -9,9 +9,13 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
@@ -48,7 +52,6 @@ public class IndexingExample {
             System.out.println("인덱스 디렉토리 문서를 색인 합니다. '" + indexPath + "'...");
 
             Directory dir = SimpleFSDirectory.open(Paths.get(indexPath));
-
             Analyzer analyzer = new StandardAnalyzer();                             //기본 스탠다드분석기를 사용함
             IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);  //인덱스 Writer의 설정을 지정하는 클래스
 //            if (create) {
@@ -58,7 +61,7 @@ public class IndexingExample {
 //                // 기존 인덱스에 새도큐먼트를 추가함
 //                indexWriterConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
 //            }
-            indexWriterConfig.setOpenMode(OpenMode.CREATE);
+            indexWriterConfig.setOpenMode(OpenMode.APPEND);
             indexWriterConfig.setUseCompoundFile(false); //다중 파일 색인 생성시  !!!!!!!
 
             // 생인성능을 위해 램버퍼를 지정할수 있음
@@ -103,8 +106,8 @@ public class IndexingExample {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     try {
-                        indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
-                        //indexDocForCsv(writer, file, attrs.lastModifiedTime().toMillis());
+                        //indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
+                        indexDocForCsv(writer, file, attrs.lastModifiedTime().toMillis());
                     } catch (IOException ignore) {
                         // don't index files that can't be read.
                     }
@@ -194,7 +197,7 @@ public class IndexingExample {
 //                ft.setStored(true);
 //                doc.add(new Field("title", "나는 자랑스러운", ft));
 //
-//
+////
 //                Map<String, Analyzer> analyzerMap = new HashMap<String, Analyzer>();
 //                analyzerMap.put("id", new StandardAnalyzer();
 //                analyzerMap.put("title", new WhitespaceAnalyzer();
@@ -212,7 +215,7 @@ public class IndexingExample {
 
                 //필드별 부스트 예제
                 Field field = new StringField("id", data[0], Field.Store.YES);
-                //field.setBoost(10);
+                field.setBoost(10);
                 //문서 부스트는 DoubleDocValuesField로 잊ㄴ
 
                 doc.add(new StringField("id", data[0], Field.Store.YES));

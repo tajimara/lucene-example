@@ -54,6 +54,7 @@ public class SearchingExample {
     Analyzer analyzer = new StandardAnalyzer();
 
     Query q = new QueryParser(field, analyzer).parse(queryString);
+
     System.out.println("Searching for: " + queryString);
     TopDocs matches = searcher.search(q, 10);
     System.out.println("검색 결과 Found " + matches.totalHits + " hits.");

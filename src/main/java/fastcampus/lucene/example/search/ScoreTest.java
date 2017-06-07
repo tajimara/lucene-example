@@ -49,7 +49,7 @@ public class ScoreTest extends TestCase {
     searcher.setSimilarity(new ClassicSimilarity());
 
     Query query = new TermQuery(new Term("contents", "x"));
-    Explanation explanation = searcher.explain(query, 1);
+    Explanation explanation = searcher.explain(query, 0);
     System.out.println(explanation.toString());
 
     TopDocs matches = searcher.search(query, 10);

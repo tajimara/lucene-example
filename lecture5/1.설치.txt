@@ -34,9 +34,9 @@ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.1.1.ta
 tar zxvf elasticsearch-5.1.1.tar.gz
 
 4. 노드 복사
-cp  elasticsearch-5.1.1 node1
-cp  elasticsearch-5.1.1 node2
-cp  elasticsearch-5.1.1 node3
+cp  -R elasticsearch-5.1.1 node1
+cp  -R elasticsearch-5.1.1 node2
+cp  -R elasticsearch-5.1.1 node3
 
 5. 힙메모리 수정
 vi node1/config/jvm.options

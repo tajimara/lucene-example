@@ -55,11 +55,12 @@ PUT http://localhost:9200/news
 
 
 중첩된 매핑
+PUT http://localhost:9200/test/test3/_mapping
 {
   "properties": {
     "urn":          {"type": "string", "index": "not_analyzed"},
-    "title":        {"type": "string", "analyzer": "korean"},
-    "content":      {"type": "string", "analyzer": "korean"},
+    "title":        {"type": "text"},
+    "content":      {"type": "text"},
     "writer":       {
       "type": "nested",
       "properties": {
@@ -205,3 +206,38 @@ http://localhost:9200/_analyze?filter=lowcase&pretty
       }
   }
 }
+
+
+7. 템플릿
+
+템플릿 생성
+
+localhost:9200/_template/template_1?pretty
+{
+  "template": "te*",
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "type1": {
+      "_source": {
+        "enabled": false
+      },
+      "properties": {
+        "host_name": {
+          "type": "keyword"
+        },
+        "created_at": {
+          "type": "date",
+          "format": "EEE MMM dd HH:mm:ss Z YYYY"
+        }
+      }
+    }
+  }
+}
+
+템플릿 삭제
+curl -XDELETE 'localhost:9200/_template/template_1?pretty'
+
+템플릿 조회
+curl -XGET 'localhost:9200/_template/template_1?pretty'

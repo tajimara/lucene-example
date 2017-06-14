@@ -93,7 +93,7 @@ curl -XPUT localhost:9200/_template/template_2014_04 -d '
   "template" : "logs-2014-04-*",
   "aliases" : {
     "logs-2014-04" : {}
-  }
+  }``
 }
 '
 curl -XPUT localhost:9200/_template/template_2014 -d '
@@ -147,7 +147,7 @@ discovery.zen.minimum_master_nodes: 2  (default 1)
 (master_eligible_nodes / 2) + 1
 
 7. GC 모니터링
-stat -gcutil -h5 [pid] 1000
+jstat -gcutil -h5 [pid] 1000
   - S0 : Survivor 영역 0 의 사용율 (현재의 용량에 대한 퍼센티지)
   - S1 : Survivor 영역 1 의 사용율 (현재의 용량에 대한 퍼센티지)
   - E : Eden 영역의 사용율 (현재의 용량에 대한 퍼센티지)
@@ -158,3 +158,4 @@ stat -gcutil -h5 [pid] 1000
   - FGC : 풀 GC 이벤트수
   - FGCT : 풀 가베지 콜렉션 시간
   - GCT : 가베지 콜렉션총시간
+

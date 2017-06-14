@@ -1,0 +1,133 @@
+1. 캐릭터필터 토크나이저 토큰 필터를 단순 결합하는 형태
+  curl -XPUT ‘http://localhost:9200/books' -d ‘
+   {
+     "settings": {
+       "analysis": {
+         "analyzer": {
+           "my_custom_analyzer": {
+             "type":      "custom",
+             "tokenizer": "standard",
+             "char_filter": [
+               "html_strip"
+             ],
+             "filter": [
+               "lowercase",
+               "asciifolding"
+             ]
+           }
+         }
+       }
+     }
+   }
+
+2. ngram 커스텀 토크나이저 실습
+
+curl -XPUT ‘http://localhost:9200/books' -d ‘
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "my_analyzer": {
+          "tokenizer": "my_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "my_tokenizer": {
+          "type": "ngram",
+          "min_gram": 3,
+          "max_gram": 3,
+          "token_chars": [
+            "letter",
+            "digit"
+          ]
+        }
+      }
+    }
+  }
+}
+
+3. 동의어처리 토큰 필터 실습
+
+curl -XPUT ‘http://localhost:9200/books' -d ‘
+{
+    "settings": {
+        "index" : {
+            "analysis" : {
+                "analyzer" : {
+                    "synonym" : {
+                        "tokenizer" : "whitespace",
+                        "filter" : ["synonym"]
+                    }
+                },
+                "filter" : {
+                    "synonym" : {
+                        "type" : "synonym",
+                        "synonyms" : [
+                            "i-pod, i pod => ipod",
+                            "삼성, samsung"
+                        ],
+                        "synonyms_path" : "analysis/synonym.txt"
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+4. 워드넷 적용
+curl -XPUT ‘http://localhost:9200/books' -d ‘
+{
+    "settings": {
+        "index" : {
+            "analysis" : {
+                "analyzer" : {
+                    "synonym" : {
+                        "tokenizer" : "whitespace",
+                        "filter" : ["synonym"]
+                    }
+                },
+                "filter" : {
+                     "synonym" : {
+                        "type": "synonym",
+                        "format": "wordnet",
+                        "synonyms_path": "analysis/wn_s.pl"
+                    }
+                }
+            }
+        }
+    }
+}
+
+http://localhost:9200/books?analyzer=synonym&text=baby
+
+
+5. 한글 형태소 분석기 적용
+
+-테스트 해보기 (분석기 설정
+ {
+   "settings" : {
+     "index":{
+       "analysis":{
+         "analyzer":{
+           "korean":{
+             "type":"custom",
+             "tokenizer":"seunjeon_default_tokenizer"
+           }
+         },
+         "tokenizer": {
+           "seunjeon_default_tokenizer": {
+             "type": "seunjeon_tokenizer",
+             "index_eojeol": false,
+             "user_words": ["낄끼+빠빠,-100", "c\\+\\+", "어그로", "버카충", "abc마트"]
+           }
+         }
+       }
+     }
+   }
+ }
+- 테스트 분석
+{
+  "analyzer" : "korean",
+  "text" : "한글형태소분석기 "
+}

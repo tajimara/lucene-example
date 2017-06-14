@@ -26,7 +26,7 @@ POST 메소드로 수정한다.
 }
 
 4. 데이터 삭제
--XDELTE http://localhost:9200/news/article/1
+-XDELTE http://localhost:9200/news/article
 
 모든 인덱스 삭제
 $ curl -XDELETE 'http://localhost:9200/*'

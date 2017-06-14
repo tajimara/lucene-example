@@ -5,12 +5,24 @@ PUT http://localhost:9200/news
     "article": {
       "properties": {
         "title": {
-          "type" : "string"
+          "type" : "text"
         },
         "link" : {
           "type" : "string"
         },
-        "reg_date" : {
+        "description" : {
+          "type" : "text"
+        },
+        "author" : {
+          "type" : "keyword"
+        },
+        "media" : {
+          "type" : "keyword"
+        },
+        "category" : {
+          "type" : "keyword"
+        },
+        "modDate" : {
           "type" : "date"
         }
       }
@@ -22,39 +34,74 @@ PUT http://localhost:9200/news/_mapping/article
 {
   "properties": {
     "title": {
-      "type" : "string"
+      "type" : "text"
     },
     "link" : {
       "type" : "string"
     },
-    "reg_date" : {
+    "description" : {
+      "type" : "text"
+    },
+    "author" : {
+      "type" : "keyword"
+    },
+    "media" : {
+      "type" : "keyword"
+    },
+    "category" : {
+      "type" : "keyword"
+    },
+    "modDate" : {
       "type" : "date"
     }
   }
 }
 
+
+
+색인을 위한 템플릿 추가
+
+curl -XPUT 'localhost:9200/_template/article?pretty' -d '{
+    "template" : "article",
+    "settings" : { "index.refresh_interval" : "5s" },
+    "mappings" : {
+        "article" : {
+            "properties": {
+                "title": {
+                  "type" : "text"
+                },
+                "link" : {
+                  "type" : "string"
+                },
+                "description" : {
+                  "type" : "text"
+                },
+                "author" : {
+                  "type" : "keyword"
+                },
+                "media" : {
+                  "type" : "keyword"
+                },
+                "category" : {
+                  "type" : "keyword"
+                },
+                "modDate" : {
+                  "type" : "date"
+                }
+              }
+        }
+    }
+}'
+
+
+
 2. 설정된 매핑 조회
 GET http://localhost:9200/news/_mapping/article
 
-3. 분석기 매핑 추가
-분석기 추가 매핑
-PUT http://localhost:9200/news
-{
-  "mappings": {
-    "article": {
-      "properties": {
-        "id": {"type":"long","store":"yes","precision_step":"8"},
-        "title": {"type" : "string","store":"yes","index":"analyzed"},
-        "link" : {"type" : "string"},
-        "content" : {"type" : "string","store":"no","index":"analyzed"},
-        "reg_date" : {"type" : "date"}
-      }
-    }
-  }
-}
 
 
-중첩된 매핑
+
+3. 중첩된 매핑
 PUT http://localhost:9200/test/test3/_mapping
 {
   "properties": {
@@ -117,55 +164,6 @@ PUT http://localhost:9200/news/_settings
   }
 }
 
-좀더 복잡한 분석기 세팅
-PUT http://localhost:9200/news/_settings
-{
-  "settings": {
-    "analysis": {
-      "analyzer": {
-        "my_custom_analyzer": {
-          "type":      "custom",
-          "tokenizer": "standard",
-          "char_filter": [
-            "html_strip"
-          ],
-          "filter": [
-            "lowercase",
-            "asciifolding"
-          ]
-        }
-      }
-    }
-  }
-}
-
-세팅을 조정하기 위해  인덱스  close
-http://localhost:9200/news/_close
-작업 완료후
-http://localhost:9200/news/_open
-
-세팅 내역 확인
-http://localhost:9200/news/_settings
-
-5. 분석기 테스트
-* 분석기 테스트
-POST http://localhost:9200/news/_analyze
-{
-  "analyzer": "my_custom_analyzer",
-  "text": "The 2 QUICK Brown-Foxes jumped over the lazy dog's bone."
-}
-
-
-POST http://localhost:9200/news/_analyze
-{
-  "tokenizer" : "keyword",
-  "filter" : ["lowercase"],
-  "text" : "this is a test"
-}'
-
-혹은
-http://localhost:9200/_analyze?tokenizer=whitespace&pretty
-http://localhost:9200/_analyze?filter=lowcase&pretty
 
 6. 좌표검색 매핑
 1. http://localhost:9200/news/_mapping/store  <-- 타입이름매
@@ -190,13 +188,14 @@ http://localhost:9200/_analyze?filter=lowcase&pretty
 좌표 검색
 {
     "query" : {
-      "filtered" : {
-          "query" : {
+      "bool" : {
+          "must" : {
               "match_all": {}
           },
           "filter" : {
               "geo_distance" : {
-                  "distance" : "200km",
+                  "distance" : "20990km",
+                  "distance_type": "plane",
                   "location" : {
                       "lat" : 37.2323,
                       "lon" : 126.232323
@@ -204,8 +203,41 @@ http://localhost:9200/_analyze?filter=lowcase&pretty
               }
           }
       }
-  }
+    },"sort" : [
+             {
+                 "_geo_distance" : {
+                     "location" : [126.926644, 37.523434],
+                     "order" : "asc",
+                     "unit" : "km"
+                 }
+             }
+         ]
 }
+
+폴리곤 검색
+
+GET /_search
+{
+    "query": {
+        "bool" : {
+            "must" : {
+                "match_all" : {}
+            },
+            "filter" : {
+                "geo_polygon" : {
+                    "person.location" : {
+                        "points" : [
+                        {"lat" : 40, "lon" : -70},
+                        {"lat" : 30, "lon" : -80},
+                        {"lat" : 20, "lon" : -90}
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 7. 템플릿

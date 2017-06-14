@@ -19,17 +19,23 @@ putty configuration 에서 [ssh]-[auth] 메뉴에서 private key for authenticat
 
 - root 패스워드 변경
 sudo passwd root
+su
+exit
 
-2. 자바8 설치
+2. 자바8 설치 (root 계정으로)
 -설치가능한 자바 버전 확인
 yum list java*jdk-devel
 -설치
 yum install java-1.8.0-openjdk-devel.x86_64
+
+java -version
+
 -시스템에서 사용할 자바 버전 변경
 alternatives --config java
 alternatives --config javac
 
-3. 엘라스틱서치 다운로드 및 설치
+
+3. 엘라스틱서치 다운로드 및 설치 (ec2-user 계정으로)
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.1.1.tar.gz
 tar zxvf elasticsearch-5.1.1.tar.gz
 
@@ -44,28 +50,36 @@ vi node1/config/jvm.options
 6. 실행
 node1/bin/elasticsearch
 
-7. 파일 최대 개방 갯수 늘리기
+7. 파일 최대 개방 갯수 늘리기 (루트 계정으로)
 -임시 조절
 ulimit -n 65536
 
 -영구 조절
-vi /etc/security/limits.conf
+sudo vi /etc/security/limits.conf
 아래 텍스트 추가
 root hard nofile 65536
 root soft nofile 65536
 root hard nproc 65536
 root soft nproc 65536
+ec2-user hard nofile 65536
+ec2-user soft nofile 65536
+ec2-user hard nproc 65536
+ec2-user soft nproc 65536
 
-8. vm.max_map_count 부족 오류 해결
-설정되어 있는 vm.max_map_count 값 확인
+
+8. vm.max_map_count 부족 오류 해결 (루트 계정으로)
+-설정되어 있는 vm.max_map_count 값 확인
 $ sysctl vm.max_map_count
 
-vm.max_map_count 값 설정
+-vm.max_map_count 값 설정
 $ sysctl -w vm.max_map_count=262144
 
-conf 파일로 설정
-$ vi /etc/sysctl.conf
-$ sysctl -p
+-conf 파일로 설정
+$ sudo vi /etc/sysctl.conf
+-아래 문자열 추가
+vm.max_map_count=262144
+-확인
+$ sudo sysctl -p
 
 9.head 설치
 -git 설치
@@ -94,14 +108,15 @@ http.cors.allow-origin: "*"
 http.cors.allow-headers: Authorization  (http://localhost:9100/?auth_user=elastic&auth_password=changeme)
 
 
+
 10. 은전한닢 설치하기
 -쉬운 설치 법
 bash <(curl -s https://bitbucket.org/eunjeon/seunjeon/raw/master/elasticsearch/scripts/downloader.sh) -e 5.1.1 -p 5.1.1.1
 bin/elasticsearch-plugin install file://`pwd`/elasticsearch-analysis-seunjeon-5.1.1.1.zip
 
 -테스트 해보기 (분석기 설정
+PUT http://13.124.87.104:9100/news/_settings
  {
-   "settings" : {
      "index":{
        "analysis":{
          "analyzer":{
@@ -119,7 +134,7 @@ bin/elasticsearch-plugin install file://`pwd`/elasticsearch-analysis-seunjeon-5.
          }
        }
      }
-   }
+
  }
 - 테스트 분석
 {

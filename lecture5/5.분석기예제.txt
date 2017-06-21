@@ -180,7 +180,7 @@ elyzer --es "http://localhost:9200" --index news --analyzer standard "Mary had a
 sudo node2/bin/elasticsearch-plugin install analysis-icu
 7. 스펠체커
 http://13.124.148.231:9200/icu
-1) 매핑
+1) 분석기 세팅
 {
   "settings": {
     "index": {
@@ -211,7 +211,7 @@ http://13.124.148.231:9200/icu
   }
 }
 
-
+2) 매핑
 -XPUT http://13.124.148.231:9200/icu4/_mapping/spell
 {
   "properties": {
@@ -239,7 +239,7 @@ http://13.124.148.231:9200/icu
 damerau_levenshtein/levenshtein/jarowinkler
 
 
-Phase Suggester
+Phrase Suggester
 
 {
   "suggest": {
@@ -283,5 +283,7 @@ PUT autocomplete
     }
 }
 
+
+node1/bin/elasticsearch-plugin install file://`pwd`/es-plugin-1.0.zip
 
 

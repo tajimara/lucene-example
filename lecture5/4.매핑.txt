@@ -401,3 +401,5 @@ curl -XDELETE 'localhost:9200/_template/template_1?pretty'
 
 템플릿 조회
 curl -XGET 'localhost:9200/_template/template_1?pretty'
+
+

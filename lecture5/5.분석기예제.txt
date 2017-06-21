@@ -284,6 +284,6 @@ PUT autocomplete
 }
 
 
-node1/bin/elasticsearch-plugin install file://`pwd`/es-plugin-1.0.zip
+node1/bin/elasticsearch-plugin install file://`pwd`/jaso-plugin-1.0.zip
 
 

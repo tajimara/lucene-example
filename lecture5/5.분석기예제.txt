@@ -151,6 +151,14 @@ http://localhost:9200/books?analyzer=synonym&text=baby
     }
 
  }
+
+
+               "seunjeon_default_tokenizer": {
+                             "type": "seunjeon_tokenizer",
+
+                         }
+
+
 -XPOST http://localhost:9200/news/_open
 
 - 테스트 분석
@@ -169,6 +177,7 @@ elyzer --es "http://localhost:9200" --index news --analyzer standard "Mary had a
 
 
 ---------------------------------------------------------------------------------------------------------
+sudo node2/bin/elasticsearch-plugin install analysis-icu
 7. 스펠체커
 http://13.124.148.231:9200/icu
 1) 매핑

@@ -266,6 +266,21 @@ Phrase Suggester
 
 ---------------------------------------------------------------------------------------------------------
 8. 자동완성
+-XPUT localhost:9200/autocomplete
+{
+    "settings": {
+        "index" : {
+            "analysis" : {
+                "analyzer" : {
+                    "synonym" : {
+                        "tokenizer" : "keyword",
+                        "filter" : "jaso-filter"
+                    }
+                }
+            }
+        }
+    }
+}
 
 PUT autocomplete
 {
@@ -273,17 +288,30 @@ PUT autocomplete
         "auto" : {
             "properties" : {
                 "suggest" : {
-                    "type" : "jaso_filter"
-                },
-                "title" : {
-                    "type": "keyword"
+                    "type" : "jaso_filter",
+                    "search_analyzer" : "keyword"
                 }
             }
         }
     }
 }
 
+PUT
+{
+  "keyword":"삼성전자"
+}
 
+POST _search
+{
+    "query" : {
+        "term" : {
+            "keyword" : "ㅅ"
+    }
+}
+
+
+
+플러그인 인스톨
 node1/bin/elasticsearch-plugin install file://`pwd`/jaso-plugin-1.0.zip
 
 

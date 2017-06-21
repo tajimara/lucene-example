@@ -29,7 +29,6 @@ public class JasoDecomposer {
         return resultInt;
     }
 
-
     /**
     * 한글 범위인가?
      */

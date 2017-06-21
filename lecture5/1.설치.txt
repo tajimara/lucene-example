@@ -1,3 +1,4 @@
+---------------------------------------------------------------------------------------------------------
 1.EC2 접속
 - Putty 혹은 iTerm 설치
 - 다운받은 fastcampus.pem 파일로 접속
@@ -15,13 +16,11 @@ putty 실행후
 putty configuration 에서 [ssh]-[auth] 메뉴에서 private key for authentication 메뉴를 통해 생성한 키값 로드
 
 
-
-
 - root 패스워드 변경
 sudo passwd root
 su
 exit
-
+---------------------------------------------------------------------------------------------------------
 2. 자바8 설치 (root 계정으로)
 -설치가능한 자바 버전 확인
 yum list java*jdk-devel
@@ -34,7 +33,7 @@ java -version
 alternatives --config java
 alternatives --config javac
 
-
+---------------------------------------------------------------------------------------------------------
 3. 엘라스틱서치 다운로드 및 설치 (ec2-user 계정으로)
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.1.1.tar.gz
 tar zxvf elasticsearch-5.1.1.tar.gz
@@ -43,13 +42,13 @@ tar zxvf elasticsearch-5.1.1.tar.gz
 cp  -R elasticsearch-5.1.1 node1
 cp  -R elasticsearch-5.1.1 node2
 cp  -R elasticsearch-5.1.1 node3
-
+---------------------------------------------------------------------------------------------------------
 5. 힙메모리 수정
 vi node1/config/jvm.options
-
+---------------------------------------------------------------------------------------------------------
 6. 실행
 node1/bin/elasticsearch
-
+---------------------------------------------------------------------------------------------------------
 7. 파일 최대 개방 갯수 늘리기 (루트 계정으로)
 -임시 조절
 ulimit -n 65536
@@ -66,7 +65,7 @@ ec2-user soft nofile 65536
 ec2-user hard nproc 65536
 ec2-user soft nproc 65536
 
-
+---------------------------------------------------------------------------------------------------------
 8. vm.max_map_count 부족 오류 해결 (루트 계정으로)
 -설정되어 있는 vm.max_map_count 값 확인
 $ sysctl vm.max_map_count
@@ -80,7 +79,7 @@ $ sudo vi /etc/sysctl.conf
 vm.max_map_count=262144
 -확인
 $ sudo sysctl -p
-
+---------------------------------------------------------------------------------------------------------
 9.head 설치
 -git 설치
 yum install git
@@ -101,14 +100,13 @@ npm run start
 http://{주소}:9100
 
 -외부에서 보기
-elasticsearch.yml에 추가
+config/elasticsearch.yml에 추가
 http.cors.enabled: true
 http.cors.allow-origin: "*"
 
 http.cors.allow-headers: Authorization  (http://localhost:9100/?auth_user=elastic&auth_password=changeme)
 
-
-
+---------------------------------------------------------------------------------------------------------
 10. 은전한닢 설치하기
 -쉬운 설치 법
 bash <(curl -s https://bitbucket.org/eunjeon/seunjeon/raw/master/elasticsearch/scripts/downloader.sh) -e 5.1.1 -p 5.1.1.1
@@ -117,8 +115,8 @@ bin/elasticsearch-plugin install file://`pwd`/elasticsearch-analysis-seunjeon-5.
 -테스트 해보기 (분석기 설정
 PUT http://13.124.87.104:9100/news/_settings
  {
-     "index":{
-       "analysis":{
+    "index":{
+        "analysis":{
          "analyzer":{
            "korean":{
              "type":"custom",
@@ -132,18 +130,17 @@ PUT http://13.124.87.104:9100/news/_settings
              "user_words": ["낄끼+빠빠,-100", "c\\+\\+", "어그로", "버카충", "abc마트"]
            }
          }
-       }
-     }
-
+        }
+    }
  }
 - 테스트 분석
+
+http://localhost:9200/_analyze?analyzer=korean&text=한글형태소분석기
+
+혹은
+
 {
   "analyzer" : "korean",
   "text" : "한글형태소분석기 "
 }
-
-
-11. elasticsearch.yml 설명
-
-12. 보안세팅
-
+---------------------------------------------------------------------------------------------------------

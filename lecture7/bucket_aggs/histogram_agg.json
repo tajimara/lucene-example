@@ -1,0 +1,10 @@
+{
+  "aggs" : {
+    "count_month" : {
+      "date_histogram" : {
+        "field" : "submit_date",
+        "interval" : "month"
+      }
+    }
+  }
+}

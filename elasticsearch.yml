@@ -1,0 +1,152 @@
+# ======================== Elasticsearch Configuration =========================
+#
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what are you trying to accomplish and the consequences.
+#
+# The primary way of configuring a node is via this file. This template lists
+# the most important settings you may want to configure for a production cluster.
+#
+# Please see the documentation for further information on configuration options:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration.html>
+#
+#모든 설정은 아래형식으로 구동시 옵션으로 설정 가능
+#bin/elasticsearch -Epath.conf=/path/to/my/config/ 
+# ---------------------------------- Cluster -----------------------------------
+#
+# Use a descriptive name for your clustez
+# 클러스터 이름 지정
+cluster.name: my-application
+#
+# ------------------------------------ Node ------------------------------------
+#
+# Use a descriptive name for the node:
+# 노드이름 지정 5.0 이후 노드 이름으로 관리하지 않고 별도의 Node Id를 가지고 관리함
+node.name: node-1
+node.master: true
+node.data: true
+
+
+#
+# Add custom attributes to the node:
+# 노드가 있는 렉의 위치를 추가 정보로 지정(옵션)
+#node.attr.rack: r1
+#
+# ----------------------------------- Paths ------------------------------------
+#
+# Path to directory where to store the data (separate multiple locations by comma):
+# 색인 데이터 저장 위치 지정
+#path.data: /path/to/data
+#
+# Path to log files:
+# 로그 데이터 저장 위치 지정
+#path.logs: /path/to/logs
+#
+# ----------------------------------- Memory -----------------------------------
+#
+# Lock the memory on startup:
+# 메모리 swap 설정(메모리를 다른 곳에서 사용하지 못하게)
+#bootstrap.memory_lock: true
+#
+# Make sure that the heap size is set to about half the memory available
+# on the system and that the owner of the process is allowed to use this
+# limit.
+#
+# Elasticsearch performs poorly when the system is swapping the memory.
+#
+# ---------------------------------- Network -----------------------------------
+#
+# Set the bind address to a specific IP (IPv4 or IPv6):
+# 노드의 사용 호스트 _local_ _site_
+# non-loopback 주소여야 운영환경으로 전환(외부접속 가능) 
+network.host: 0.0.0.0
+#
+# Set a custom port for HTTP:
+# 노드의 사용 포트
+http.port: 9200   
+#
+#Cross Origin Resource Sharing 허용 여부
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+#
+# For more information, see the documentation at:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html>
+#
+# --------------------------------- Discovery ----------------------------------
+#
+# Pass an initial list of hosts to perform discovery when new node is started:
+# The default list of hosts is ["127.0.0.1", "[::1]"]
+#EC2 인스턴스의 프라이빗 IP 주소들의 목록
+#유니캐스트 젠디스커버리
+discovery.zen.ping.unicast.hosts: ["52.79.101.100:9300", "52.79.101.100:9301","172.31.22.159:9300","172.31.22.159:9301"]
+#
+# Prevent the "split brain" by configuring the majority of nodes (total number of nodes / 2 + 1):
+# 디스커버리를 시작할 최소의 마스터 노드수  (split brain을 회피하기 위한 설정)
+#discovery.zen.minimum_master_nodes: 3
+#
+#ping_interval: 얼마나 자주 확인 할것인가 (기본값 1초)
+#ping_timeout:얼마나 핑을 더 기다릴 것인가?(기본값 3초)
+#ping_retries:얼마나 많이 시도할 것인가(기본값 3)
+#discovery.zen.ping_interval
+#discovery.zen.ping_retries
+#discovery.zen.ping_timeout: 10s
+
+#
+# For more information, see the documentation at:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-discovery.html>
+#
+# ---------------------------------- Gateway -----------------------------------
+#
+# Block initial recovery after a full cluster restart until N nodes are started:
+#리커버리시에 노드가 숫자만큼 활성화 하였을시 리커버 실시
+#gateway.recover_after_nodes: 3
+#gateway.expected_master_nodes
+#gateway.expected_data_nodes
+#gateway.recover_after_time
+#
+#
+# For more information, see the documentation at:
+# <http://www.elastic.co/guide/en/elasticsearch/reference/current/modules-gateway.html>
+#
+# ---------------------------------- Various -----------------------------------
+#
+# Require explicit names when deleting indices:
+# 색인 삭제시 _all과 와일드카드를 사용 못하게함
+#action.destructive_requires_name: true
+#
+#
+#
+#기타
+#discovery.zen.ping.multicast.enabled: false
+# production에서는 multicast의 단점이 많으니 false로 끔
+#
+# 문서가 색인될때 인덱스가 존재하지 않으며 인덱스를 자동으로 만들어줌
+# action.auto_create_index: true
+#
+# 문서가 색인될때 매핑이 되어 있지 않으면 자동으로 매핑함
+# index.mapper.dynamic: true
+#
+# 소팅과 어그리게이션이 많을 때 캐쉬를 설정하여 성능을 향상시킴(절대값으로도 가능 2GB
+# indices.fielddata.cache.size: 75%
+#
+# 디스크용량이 지정한 비율보다 적으면 샤드를 할당하지 않는다.
+# cluster.routing.allocation.disk.watermark.low: 90%
+#
+# 값이 클수록 모든 노드에서  샤드를 균등하게 분배하려는 경향성 높아짐 
+# cluster.routing.allocation.balance.shard: 0.45
+#
+# 값이 클수록 각인덱스에서 샤드를 균등하게 분배하려는 경향성 높아짐 
+# cluster.routing.allocation.balance.index: 0.55
+#
+# 재배치가 일어날 경향이 높아진다. 
+#cluster.routing.allocation.balance.threshold: 1
+#
+#해당 설정값 만큼 트랜잭션로그가 쌓이면 flush함 
+#index.translog.flush_threshold_size: 1GB
+
+
+
+
+
+
+

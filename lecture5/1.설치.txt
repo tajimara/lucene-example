@@ -106,6 +106,37 @@ http.cors.allow-origin: "*"
 
 http.cors.allow-headers: Authorization  (http://localhost:9100/?auth_user=elastic&auth_password=changeme)
 
+
+9-1 우분트에서 elasticsearch-head 설치법
+
+1. git이 설치되었다는 전제하에 소스 다운로드
+git clone git://github.com/mobz/elasticsearch-head.git
+
+2. npm 패키지 설치
+sudo apt install npm
+
+3. 소스로 이동
+cd elasticsearch-head
+
+4. nodejs-legacy
+sudo apt-get install nodejs-legacy
+
+5. /usr/local 에 설치되서 생기는 권한 문제 해결을 위해
+아래와 같이 일반 계정 홈에 .npmrc 파일 생성
+
+cat >>~/.npmrc <<NPMRC
+root=$HOME/.node_libraries
+binroot=$HOME/bin
+manroot=$HOME/share/man
+NPMRC
+
+6. elasticsearch-head를 설치
+npm install
+
+7. 실행
+npm rutn start
+
+
 ---------------------------------------------------------------------------------------------------------
 10. 은전한닢 설치하기
 -쉬운 설치 법

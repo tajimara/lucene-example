@@ -199,9 +199,7 @@ vi filebeat.yml
 
 vi nginx_with_beat.conf
 input {
-        beats {
-                port => 5044
-        }
+k
 }
 
 filter {
@@ -236,5 +234,13 @@ document_type => "%{[@metadata][type]}"
 
 
 - 키바나 설치
+
+wget https://artifacts.elastic.co/downloads/kibana/kibana-5.4.3-linux-x86_64.tar.gz
+tar xvf kibana-5.4.3-linux-x86_64.tar.gz
+cd kibana-5.4.3-linux-x86_64
+bin/kibana
+
+
+
 .es(timefield="time_slot",index="seoul-metro-2016",metric=sum:people_in,q=station_name:상왕십리).label("상왕십리역"),.es(timefield="time_slot",index="seoul-metro-2016",metric=sum:people_in,q=station_name:왕십리).label("왕십리")
 

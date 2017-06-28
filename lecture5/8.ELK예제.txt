@@ -170,6 +170,10 @@ output {
 
 
 - 파일비트랑 함께 사용하기
+wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-5.1.1-linux-x86_64.tar.gz
+tar zxvf filebeat-5.1.1-linux-x86_64.tar.gz
+cd filebeat-5.1.1-linux-x86_64
+sudo ./filebeat -e -c filebeat.yml  (데몬 실행)
 
 vi filebeat.yml
 

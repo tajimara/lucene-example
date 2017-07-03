@@ -244,3 +244,15 @@ bin/kibana
 
 .es(timefield="time_slot",index="seoul-metro-2016",metric=sum:people_in,q=station_name:상왕십리).label("상왕십리역"),.es(timefield="time_slot",index="seoul-metro-2016",metric=sum:people_in,q=station_name:왕십리).label("왕십리")
 
+
+node1/config/jvm.options
+-Dcom.sun.management.jmxremote
+-Dcom.sun.management.jmxremote.port=9999
+-Dcom.sun.management.jmxremote.rmi.port=9998
+-Dcom.sun.management.jmxremote.ssl=false
+-Dcom.sun.management.jmxremote.authenticate=false
+-Djava.rmi.server.hostname=52.78.3.42
+
+
+
+path.repo: ["/home/ec2-user/my_backup", "/home/ec2-user/longterm_backup"]

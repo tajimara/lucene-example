@@ -187,13 +187,13 @@ http://13.124.148.231:9200/icu
       "analysis": {
         "analyzer": {
           "nfkc_cf_normalized": {
-            "tokenizer": "icu_tokenizer",
+            "tokenizer": "standard",
             "char_filter": [
               "icu_normalizer"
             ]
           },
           "nfd_normalized": {
-            "tokenizer": "icu_tokenizer",
+            "tokenizer": "standard",
             "char_filter": [
               "nfd_normalizer"
             ]
